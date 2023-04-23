@@ -24,7 +24,7 @@ while RUN
             end
         end
         [enter_var,pvt_col]=min(ratio);
-        BV(pvt_row)=pvt_col;    
+        BV(pvt_row)=pvt_col;
         pvt_key=A(pvt_row, pvt_col);
         A(pvt_row,:)=A (pvt_row,:)./pvt_key; 
         for i=1:size(A,1)

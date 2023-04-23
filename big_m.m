@@ -1,56 +1,61 @@
-%BIG_M
+%BIG-M
+format short
 clc
 clear all
-a = [4 2;1 5;6 1];
-b = [4;8;3];
 M=1000;
-c=[3 -4 0 -M 0 0];
-I=[1 0 0];
-Id=eye(size(a,1));
-n1=find(I==1);
-Id(n1,n1)=-Id(n1,n1);
-A=[a Id b];
-n=2;
-m=size(A,2);
-run=1;
-bv=n+1:m-1;
-while run==1
-    basic_cost=c(bv);
-    zj=basic_cost*A;
-    zjcj=zj-c;
-    zc=zjcj(1:end-1);
-    [mz,ec]=min(zc);
-    pc=A(:,ec);
-    b=A(:,end);
-    ratio=b./pc;
-    for i=1:size(A,1)
-        if ratio(i)<0
-            ratio(i)=inf;
+var={'x1','x2','s2','s3','A1','A2','sol'};
+cost=[-2 -1 0 0 -M -M 0]; %always include sol
+A=[3 1 0 0 1 0; 4 3 -1 0 0 1; 1 2 0 1 0 0];
+b=[3;6;3];
+A=[A b];
+art_v=[5,6];
+bv=[];  % are those who form identity matrix in order
+s=eye(size(A,1)); % no. of Rows in A
+for i=1:size(s,2)
+    for j=1:size(A,2)
+        if s(:,i)==A(:,j)
+            bv = [bv j];
         end
     end
-    [leave,lindex]=min(ratio);
-    bv(lindex)=ec;
-    pivot_row=lindex;
-    pivot_column=ec;
-    pv=A(pivot_row,pivot_column);
-    pivot_row=A(pivot_row,:)/pv;
-    for i=1:size(A,1)
-        if i~=lindex
-            A(i,:)=A(i,:)-(pivot_row)*A(i,ec);
-        else
-            A(i,:)=pivot_row;
-        end
-    end
-    basic_cost=c(bv);
-    zj=basic_cost*A;
-    zjcj=zj-c;
-    zc=zjcj(1:end-1);
-    if(zc>=0)
-        run=0;
-    else
-        run=1;
-    end
-    
 end
-A
-zjcj(end)
+RUN = true;
+while RUN 
+    ZjCj = cost(bv)*A-cost;
+    ZC = ZjCj(1,1:end-1); %remove sol to find pvt_col
+    ST = [A;ZjCj];
+    ST = array2table(ST,'VariableNames',var)
+    if any(ZC<0)
+        [val,pvt_col]=min(ZC);
+        if all(A(:,pvt_col)<=0)
+            fprintf('Unbounded LPP');
+            return;
+        end
+        sol=A(:,end);
+        PC=A(:,pvt_col);
+        for i=1:size(A,1)
+            if PC(i)>0
+                ratio(i)=sol(i)/PC(i);
+            else
+                ratio(i)=inf;
+            end
+        end
+        [val,pvt_row]=min(ratio);
+        PK = A(pvt_row,pvt_col);
+        %%% Row Transformation
+        A(pvt_row,:)=A(pvt_row,:)/PK; %pvt_row/PK
+        for i=1:size(A,1)
+            if i~=pvt_row
+                A(i,:)=A(i,:)-A(i,pvt_col)*A(pvt_row,:);
+            end
+        end
+        bv(pvt_row) = pvt_col;
+    else
+        RUN=false;
+    end
+end
+if find(art_v) == any(bv)
+    fprintf('Infeasible Solution');
+end    
+fprintf('Optimal Table ->');
+ST
+fprintf('\nOpt Sol = %f', ZjCj(end));
