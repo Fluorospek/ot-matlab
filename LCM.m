@@ -27,17 +27,17 @@ BFS=m+n-1             % Total No. of BFS
 %% Finding the cell(with minimum cost) for the allocations
 for i=1:size(Cost,1)
     for j=1:size(Cost,2)
-hh=min(Cost(:))   % Finding minimum cost value
-[Row_index, Col_index]=find(hh==Cost)  % Finding position of minimum cost cell
-x11=min(A(Row_index),B(Col_index))
-[Value,index]=max(x11)            % Find maximum allocation
-ii=Row_index(index)       % Identify Row Position
-jj=Col_index(index)        % Identify Column Position
-y11=min(A(ii),B(jj))        % Find the value
-X(ii,jj)=y11
-A(ii)=A(ii)-y11
-B(jj)=B(jj)-y11
-Cost(ii,jj)=Inf
+        hh=min(Cost(:))   % Finding minimum cost value
+        [Row_index, Col_index]=find(hh==Cost)  % Finding position of minimum cost cell
+        x11=min(A(Row_index),B(Col_index))
+        [Value,index]=max(x11)            % Find maximum allocation
+        ii=Row_index(index)       % Identify Row Position
+        jj=Col_index(index)        % Identify Column Position
+        y11=min(A(ii),B(jj))        % Find the value
+        X(ii,jj)=y11
+        A(ii)=A(ii)-y11
+        B(jj)=B(jj)-y11
+        Cost(ii,jj)=Inf
     end
 end
 %% Print the initial BFS
